@@ -1,4 +1,4 @@
-package com.cbxg.sql;
+package com.cbxg.sql.connector.table;
 
 import com.cbxg.sql.bean.WaterSensor;
 import org.apache.flink.api.java.tuple.Tuple2;

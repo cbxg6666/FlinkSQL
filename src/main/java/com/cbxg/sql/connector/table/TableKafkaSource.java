@@ -1,4 +1,4 @@
-package com.cbxg.sql.connector;
+package com.cbxg.sql.connector.table;
 
 import org.apache.flink.api.java.tuple.Tuple2;
 import org.apache.flink.streaming.api.datastream.DataStream;
@@ -19,13 +19,10 @@ import static org.apache.flink.table.api.Expressions.$;
  * @date:2021/4/5
  * @description: table api kafka connector
  */
-public class TableKafka {
+public class TableKafkaSource {
     public static void main(String[] args) throws Exception {
         StreamExecutionEnvironment env = StreamExecutionEnvironment.getExecutionEnvironment();
         env.setParallelism(1);
-
-
-
         StreamTableEnvironment tableEnv = StreamTableEnvironment.create(env);
         tableEnv.connect(
                 new Kafka()
