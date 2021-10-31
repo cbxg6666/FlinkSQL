@@ -47,6 +47,8 @@ public class sql01 {
         DataStream<Tuple2<Boolean, Row>> tuple2DataStream = tableEnv.toRetractStream(select, Row.class);
 
         tuple2DataStream.print();
+        tableEnv.executeSql("select 1").print();
+        tableEnv.executeSql("select 2").print();
 
         env.execute("flink_01");
     }

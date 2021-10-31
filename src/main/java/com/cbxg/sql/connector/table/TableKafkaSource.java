@@ -1,6 +1,8 @@
 package com.cbxg.sql.connector.table;
 
 import org.apache.flink.api.java.tuple.Tuple2;
+import org.apache.flink.runtime.state.filesystem.FsStateBackend;
+import org.apache.flink.streaming.api.CheckpointingMode;
 import org.apache.flink.streaming.api.datastream.DataStream;
 import org.apache.flink.streaming.api.environment.StreamExecutionEnvironment;
 import org.apache.flink.table.api.DataTypes;
@@ -23,13 +25,18 @@ public class TableKafkaSource {
     public static void main(String[] args) throws Exception {
         StreamExecutionEnvironment env = StreamExecutionEnvironment.getExecutionEnvironment();
         env.setParallelism(1);
+        env.setStateBackend(new FsStateBackend("file:///D:/gitProjects/flink_sql_tutorials/chk"));
+        //每1分钟的检查点
+        env.enableCheckpointing(1*60 * 1000);
+        env.getCheckpointConfig().setCheckpointingMode(CheckpointingMode.EXACTLY_ONCE);
         StreamTableEnvironment tableEnv = StreamTableEnvironment.create(env);
         tableEnv.connect(
                 new Kafka()
                 .version("universal")
                 .topic("sensor")
-                .startFromEarliest()
-                .property("group.id","").property("bootstrap.servers","hadoop102:9092")
+                        .startFromGroupOffsets()
+//                .startFromEarliest()
+                .property("group.id","hhhhh").property("bootstrap.servers","hadoop102:9092")
         )
          .withFormat(new Json())
          .withSchema(new Schema()
@@ -40,10 +47,11 @@ public class TableKafkaSource {
          .createTemporaryTable("sensor");
 
         Table sensor = tableEnv.from("sensor");
-        Table select = sensor.where($("id").isEqual("sensor_01"))
-                .groupBy($("id"))
-                .aggregate($("vc").sum().as("sum_vc"))
-                .select($("id"), $("sum_vc"));
+        Table select = sensor
+//                .where($("id").isEqual("sensor_01"))
+//                .groupBy($("id"))
+//                .aggregate($("vc").sum().as("sum_vc"))
+                .select($("id"), $("vc"));
 
         DataStream<Tuple2<Boolean, Row>> resultDataStream = tableEnv.toRetractStream(select, Row.class);
         resultDataStream.print();
